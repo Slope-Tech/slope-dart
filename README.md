@@ -48,6 +48,8 @@ final merchant_api = MerchantsApi();
 final loan_api = LoansApi();
 
 try {
+
+    // Flow of API calls 
     final merchant = await m.merchantGet(currency: 'usd');
     final customer = await customer_api.createCustomer('ENVIRONMENT', CreateCustomerParams(stripeAccountId: merchant.stripe.accountId));
 
@@ -68,7 +70,7 @@ try {
                     lastName: "testing_last_namé",
                     email: "cchuck@slope.so",
                     phoneNumber: "+52 9992578202",
-                    source_: "ShopVidi",
+                    source_: merchant.name,
                     businessName: "Nito company",
                     stripeInfo: LoanApplicationBuyerStripeInfo(
                         customerId: "STRIPE_CUSTOMER_ID",
@@ -81,7 +83,7 @@ try {
                       currency: "MXN",
                       description:
                           "Loco sombrero para aficionados del fútbol con bandera mexicana",
-                      id: "01EYBQ23B281VWH7ASJ9MQ3FJG",
+                      id: "SOME_ID",
                       name: "Sombrero de Fútbol con Bandera Mexicana",
                       price: 22.58)
                 ])));
