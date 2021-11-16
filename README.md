@@ -39,22 +39,57 @@ Please follow the [installation procedure](#installation--usage) and then run th
 ```dart
 import 'package:slope_dart/api.dart';
 
-// TODO Configure HTTP Bearer authorization: publicToken
-// Case 1. Use String Token
-//defaultApiClient.getAuthentication<HttpBearerAuth>('publicToken').setAccessToken('YOUR_ACCESS_TOKEN');
-// Case 2. Use Function which generate token.
-// String yourTokenGeneratorFunction() { ... }
-//defaultApiClient.getAuthentication<HttpBearerAuth>('publicToken').setAccessToken(yourTokenGeneratorFunction);
+// Configure HTTP Bearer authorization: publicToken
+const accessToken = 'pk_test_MY_SLOPE_ACCESS_TOKEN';
+defaultApiClient.getAuthentication<HttpBearerAuth>('publicToken').accessToken = accessToken;
 
-final api_instance = CustomersApi();
-final environment = environment_example; // String | The environment in which to create the customer. A value of `\"dev\"` indicates that the customer exists in the test environment and may only be accessed in the test environment. Simarly, a value of `\"prod\"` indicates that the customer exists in the production environment and may only be accessed in the production environment. Read more about [test vs. production environments](#). 
-final createCustomerParams = CreateCustomerParams(); // CreateCustomerParams | 
+final customer_api = CustomersApi();
+final merchant_api = MerchantsApi();
+final loan_api = LoansApi();
 
 try {
-    final result = api_instance.createCustomer(environment, createCustomerParams);
-    print(result);
+    final merchant = await m.merchantGet(currency: 'usd');
+    final customer = await customer_api.createCustomer('ENVIRONMENT', CreateCustomerParams(stripeAccountId: merchant.stripe.accountId));
+
+    final loan = await l.loanPost(
+        createLoanParams: CreateLoanParams(
+            subscriptionScheduleId: 1, // Use selected sub schedule
+            stage: CreateLoanParamsStageEnum.dev,
+            stripeAccountId: merchant.stripe.accountId,
+            application: LoanApplication(
+                buyer: LoanApplicationBuyer(
+                    address: LoanApplicationBuyerAddress(
+                        line1: "calle 78A3 #488",
+                        city: "Mérida",
+                        state: "Yucatán",
+                        country: "México",
+                        zipCode: "97314"),
+                    firstName: "testing_first_name",
+                    lastName: "testing_last_namé",
+                    email: "cchuck@slope.so",
+                    phoneNumber: "+52 9992578202",
+                    source_: "ShopVidi",
+                    businessName: "Nito company",
+                    stripeInfo: LoanApplicationBuyerStripeInfo(
+                        customerId: "STRIPE_CUSTOMER_ID",
+                        paymentId: "STRIPE_PAYMENT_ID")),
+                loanPrice:
+                    LoanApplicationLoanPrice(amount: 12, currency: 'usd'),
+                items: [
+                  LoanApplicationItems(
+                      count: 665,
+                      currency: "MXN",
+                      description:
+                          "Loco sombrero para aficionados del fútbol con bandera mexicana",
+                      id: "01EYBQ23B281VWH7ASJ9MQ3FJG",
+                      name: "Sombrero de Fútbol con Bandera Mexicana",
+                      price: 22.58)
+                ])));
+    final loanAccepted = await l.loanLoanIDAcceptEnvironmentPost('dev', loan.id);
+    // Or reject
+    // final loanRejected = await l.loanLoanIDRejectEnvironmentPost('dev', loan.id);
 } catch (e) {
-    print('Exception when calling CustomersApi->createCustomer: $e\n');
+    print('Exception: $e\n');
 }
 
 ```
