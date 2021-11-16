@@ -28,6 +28,13 @@ dependencies:
     path: /path/to/slope_dart
 ```
 
+### Running your app
+
+In order to run your app, you must turn off sound null safety:
+```
+flutter run --no-sound-null-safety
+```
+
 ## Tests
 
 TODO
